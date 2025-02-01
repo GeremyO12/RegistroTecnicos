@@ -8,7 +8,7 @@ public class Tecnicos
     [Range(1, int.MaxValue, ErrorMessage = "El ID debe ser mayor o igual que 1.")]
     public int TecnicoId { get; set; }
     [Required(ErrorMessage = "Este campo es requerido")]
-    public string? Nombre { get; set; }
+    public string? Nombre { get; set; } = string.Empty;
     [Range (0.01, double.MaxValue, ErrorMessage = "El campo sueldo por hora debe ser mayor que cero.")]
     public int SueldoHora { get; set; }
 }       

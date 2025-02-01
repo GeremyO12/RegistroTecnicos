@@ -1,0 +1,176 @@
+﻿@page "/Cliente/Create"
+@page "/Cliente/Create/{ClienteId:int}"
+@inject ClienteService clienteService
+@rendermode InteractiveServer
+
+<EditForm Model="Clientes" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    @*Alerta Guardado*@
+    <Alert Color="@alertColorGuardo" Dismissable="false" Hidden="@(!mostrarNotificacion)">
+        <Icon Name="@alertIconNameGuardo" class="me-2"></Icon>@alertaGuardo
+    </Alert>
+    @*Alerta Error al guardar*@
+    <Alert Color="@alertColorError" Dismissable="false" Hidden="@(!mostrarNotificacion)">
+        <Icon Name="@alertIconNameError" class="me-2"></Icon>@alertaError
+    </Alert>
+    <div class="card shadow-lg border-0 rounded" style="background-color: #f8f9fa;">
+        <div class="card-header bg-primary text-white" style="text-align: center;">
+            <h3> <i class="fas fa-clipboard-list"></i> Registro de Clientes</h3>
+        </div>
+        <div class="card-body">
+            @*ClienteId*@
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="ClienteId" class="form-label">ClienteId:</label>
+                    <div class="input-group">
+                        <div style="width: 40%; height: 1em;">
+                            <InputNumber @bind-Value="Clientes.ClienteId" class="form-control" style="font-size: 0.8em;" aria-describedby="BotonBuscar" />
+                            <ValidationMessage For="@(() => Clientes.ClienteId)" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*Fecha Ingreso*@
+            <div class="mb-3">
+                <label for="FechaIngreso" class="form-label">Fecha de Ingreso:</label>
+                <InputDate @bind-Value="Clientes.FechaIngreso" class="form-control" />
+                <ValidationMessage For="@(() => Clientes.FechaIngreso)" />
+            </div>
+            @*Nombre*@
+            <div class="mb-3">
+                <label for="Nombre" class="form-label">Nombre:</label>
+                <InputText @bind-Value="Clientes.Nombres" class="form-control" />
+                <ValidationMessage For="@(() => Clientes.Nombres)" />
+            </div>
+            @*Direccion*@
+            <div class="mb-3">
+                <label for="Direccion" class="form-label">Direccion:</label>
+                <InputText @bind-Value="Clientes.Direccion" class="form-control" />
+                <ValidationMessage For="@(() => Clientes.Direccion)" />
+            </div>
+            @*RNC*@
+            <div class="mb-3">
+                <label for="rnc" class="form-label">RNC:</label>
+                <InputText @bind-Value="Clientes.Rnc" class="form-control" />
+                <ValidationMessage For="@(() => Clientes.Rnc)" />
+            </div>
+            @*LimiteCredito*@
+            <div class="mb-3">
+                <label for="LimiteCredito" class="form-label">Limite de Credito:</label>
+                <InputNumber @bind-Value="Clientes.LimiteCredito" class="form-control" />
+                <ValidationMessage For="@(() => Clientes.LimiteCredito)" />
+            </div>
+            @*TecnidoId*@
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="TecnicoId" class="form-label">TecnicoId:</label>
+                    <div class="input-group">
+                        <div style="width: 40%; height: 1em;">
+                            <InputNumber @bind-Value="Clientes.TecnicoId" class="form-control" style="font-size: 0.8em;" aria-describedby="BotonBuscar" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer bg-light d-flex justify-content-center mt-3">
+        <div class="btn-group">
+            @*Boton Nuevo*@
+            <button type="button" class="btn btn-outline-primary ml-2" @onclick="Nuevo"><span class="bi bi-plus"></span> Nuevo </button>
+            @*Boton Guardar*@
+            <button type="submit" class="btn btn-outline-success ml-2"><span class="bi bi-check-circle-fill"></span> Guardar </button>
+            @*Boton Retroceder*@
+            <a type="button" href="/Cliente/Index/" class="btn btn-outline-danger"><span class="bi bi-arrow-bar-left"></span> Retroceder </a>
+        </div>
+    </div>
+</EditForm>
+@code {
+    [Parameter]
+    public int ClienteId { get; set; }
+    public Clientes Clientes { get; set; } = new Clientes { FechaIngreso = DateTime.Today };
+    public bool mostrarNotificacion = false;
+    AlertColor alertColorGuardo, alertColorError;
+    IconName alertIconNameError, alertIconNameGuardo;
+    string alertaGuardo = "", alertaError = "";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ClienteId != 0)
+        {
+            var cliente = await clienteService.Buscar(ClienteId);
+            if (cliente != null)
+            {
+                Clientes = cliente;
+            }
+        }
+    }
+
+    public async Task MostrarNotificacion()
+    {
+        mostrarNotificacion = true;
+        StateHasChanged();
+        await Task.Delay(5000);
+        mostrarNotificacion = false;
+        StateHasChanged();
+    }
+
+    public void AlertaGuardado()
+    {
+        alertColorGuardo = AlertColor.Success;
+        alertIconNameGuardo = IconName.CheckCircleFill;
+        alertaGuardo = "El cliente se registró de manera correcta.";
+    }
+
+    public void AlertaError()
+    {
+        alertColorError = AlertColor.Danger;
+        alertIconNameError = IconName.ExclamationTriangleFill;
+        alertaError = "Ya existe un cliente registrado con ese nombre.";
+    }
+
+    public async Task Guardar()
+    {
+        if (await Validar())
+        {
+            AlertaError();
+            await MostrarNotificacion();
+            return;
+        }
+
+        var guardado = await clienteService.Guardar(Clientes);
+        if (guardado)
+        {
+            AlertaGuardado();
+            await MostrarNotificacion();
+            Nuevo();
+        }
+        else
+        {
+            AlertaError();
+            await MostrarNotificacion();
+        }
+    }
+
+    public void Nuevo()
+    {
+        Clientes = new Clientes();
+    }
+
+    public async Task<bool> Validar()
+    {
+        return await clienteService.Existe(Clientes.Nombres, Clientes.ClienteId);
+    }
+
+    private void ActualizarFecha(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value.ToString(), out int anio))
+        {
+            int mes = Clientes.FechaIngreso.Month;
+            int dia = Math.Min(Clientes.FechaIngreso.Day, DateTime.DaysInMonth(anio, mes));
+
+            Clientes.FechaIngreso = new DateTime(anio, mes, dia);
+        }
+    }
+
+}

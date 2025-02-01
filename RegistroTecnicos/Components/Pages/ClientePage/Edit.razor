@@ -1,0 +1,108 @@
+﻿@page "/Cliente/Edit"
+@page "/Cliente/Edit/{ClienteId:int}"
+@inject ClienteService clienteService
+@rendermode InteractiveServer
+
+<EditForm Model="Clientes" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card shadow-lg border-0 rounded" style="background-color: #f8f9fa;">
+        <div class="card-header bg-primary text-white" style="text-align: center;">
+            <h3> <i class="fas fa-clipboard-list"></i> Editar Cliente</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="IdCliente" class="form-label">Id:</label>
+                    <div class="input-group">
+                        <div style="width: 40%; height: 1em;">
+                            <InputNumber @bind-Value="Clientes.ClienteId" class="form-control" style="font-size: 0.8em;" aria-describedby="BotonBuscar" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="Nombre" class="form-label">Nombre:</label>
+                <InputText @bind-Value="Clientes.Nombres" class="form-control" />
+                <ValidationMessage For="@(() => Clientes.Nombres)" />
+            </div>
+            <div class="mb-3">
+                <label for="FechaIngreso" class="form-label">Fecha de Ingreso:</label>
+                <InputNumber @bind-Value="Clientes.FechaIngreso" class="form-control" />
+                <ValidationMessage For="@(() => Clientes.FechaIngreso)" />
+            </div>
+            <div class="mb-3">
+                <label for="Direccion" class="form-label">Direccion:</label>
+                <InputNumber @bind-Value="Clientes.Direccion" class="form-control" />
+                <ValidationMessage For="@(() => Clientes.Direccion)" />
+            </div>
+        </div>
+        <div class="card-footer bg-light d-flex justify-content-center mt-3">
+            <div class="btn-group">
+                @*Boton Nuevo*@
+                <button type="button" class="btn btn-outline-primary ml-2" @onclick="Nuevo"><span class="bi bi-plus"></span> Nuevo </button>
+                @*Boton Guardar*@
+                <button type="submit" class="btn btn-outline-success ml-2"><span class="bi bi-check-circle-fill"></span> Guardar </button>
+                @*Boton Retroceder*@
+                <a type="button" href="/Cliente/Index/" class="btn btn-outline-danger"><span class="bi bi-arrow-bar-left"></span> Retroceder </a>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int ClienteId { get; set; }
+    Clientes Clientes { get; set; } = new Clientes();
+    public bool Existe { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ClienteId != 0)
+        {
+            await Buscar();
+        }
+    }
+    public async Task Buscar()
+    {
+        Existe = false;
+        var encontro = await clienteService.Buscar(ClienteId);
+
+        if (encontro != null)
+        {
+            Clientes = encontro;
+        }
+        else
+        {
+            Nuevo();
+        }
+    }
+
+    public async Task Guardar()
+    {
+        if (await Validar())
+        {
+            return;
+        }
+
+        var guardo = await clienteService.Guardar(Clientes);
+        if (guardo)
+        {
+            Nuevo();
+        }
+    }
+
+    public void Nuevo()
+    {
+        Clientes = new Clientes();
+        Existe = false;
+    }
+
+    public async Task<bool> Validar()
+    {
+        var lista = await clienteService.Listar(t => t.Nombres!.ToLower() == Clientes.Nombres!.ToLower() && t.ClienteId != Clientes.ClienteId);
+        Existe = lista.Any();
+        return Existe;
+    }
+}

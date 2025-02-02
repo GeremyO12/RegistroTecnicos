@@ -20,7 +20,7 @@ namespace RegistroTecnicos.Migrations
                     FechaIngreso = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Nombres = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Direccion = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Rnc = table.Column<int>(type: "int", nullable: false),
+                    Rnc = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LimiteCredito = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     TecnicoId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -42,6 +42,25 @@ namespace RegistroTecnicos.Migrations
                 {
                     table.PrimaryKey("PK_Tecnicos", x => x.TecnicoId);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "Tickets",
+                columns: table => new
+                {
+                    TicketId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Prioridad = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ClienteId = table.Column<int>(type: "int", nullable: false),
+                    Asunto = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TiempoInvertido = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    TecnicoId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tickets", x => x.TicketId);
+                });
         }
 
         /// <inheritdoc />
@@ -52,6 +71,9 @@ namespace RegistroTecnicos.Migrations
 
             migrationBuilder.DropTable(
                 name: "Tecnicos");
+
+            migrationBuilder.DropTable(
+                name: "Tickets");
         }
     }
 }

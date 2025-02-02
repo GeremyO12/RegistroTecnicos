@@ -1,5 +1,6 @@
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.EntityFrameworkCore;
-using Radzen;
+
 using RegistroTecnicos.Components;
 using RegistroTecnicos.DAL;
 using RegistroTecnicos.Services;
@@ -20,6 +21,11 @@ builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlServer(ConStr));
 
 //Inyeccion del service
 builder.Services.AddScoped<TecnicoService>();
+builder.Services.AddScoped<ClienteService>();
+builder.Services.AddScoped<TicketService>();
+
+
+builder.Services.Configure<CircuitOptions>(options => options.DetailedErrors = true);
 
 var app = builder.Build();
 

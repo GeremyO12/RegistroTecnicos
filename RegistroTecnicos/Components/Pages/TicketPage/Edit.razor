@@ -1,0 +1,108 @@
+﻿@page "/Ticket/Edit"
+@page "/Ticket/Edit/{TicketId:int}"
+@inject TicketService ticketService
+@rendermode InteractiveServer
+
+<EditForm Model="Tickets" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card shadow-lg border-0 rounded" style="background-color: #f8f9fa;">
+        <div class="card-header bg-primary text-white" style="text-align: center;">
+            <h3> <i class="fas fa-clipboard-list"></i> Editar Ticket</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="IdTicket" class="form-label">Id:</label>
+                    <div class="input-group">
+                        <div style="width: 40%; height: 1em;">
+                            <InputNumber @bind-Value="Tickets.TicketId" class="form-control" style="font-size: 0.8em;" aria-describedby="BotonBuscar" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="Fecha" class="form-label">Fecha:</label>
+                <InputDate @bind-Value="Tickets.Fecha" class="form-control" />
+                <ValidationMessage For="@(() => Tickets.Fecha)" />
+            </div>
+            <div class="mb-3">
+                <label for="ClienteId" class="form-label">Fecha de Ingreso:</label>
+                <InputNumber @bind-Value="Tickets.ClienteId" class="form-control" />
+                <ValidationMessage For="@(() => Tickets.ClienteId)" />
+            </div>
+            <div class="mb-3">
+                <label for="Asunto" class="form-label">Asunto:</label>
+                <InputText @bind-Value="Tickets.Asunto" class="form-control" />
+                <ValidationMessage For="@(() => Tickets.Asunto)" />
+            </div>
+        </div>
+        <div class="card-footer bg-light d-flex justify-content-center mt-3">
+            <div class="btn-group">
+                @*Boton Nuevo*@
+                <button type="button" class="btn btn-outline-primary ml-2" @onclick="Nuevo"><span class="bi bi-plus"></span> Nuevo </button>
+                @*Boton Guardar*@
+                <button type="submit" class="btn btn-outline-success ml-2"><span class="bi bi-check-circle-fill"></span> Guardar </button>
+                @*Boton Retroceder*@
+                <a type="button" href="/Tickets/Index/" class="btn btn-outline-danger"><span class="bi bi-arrow-bar-left"></span> Retroceder </a>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int TicketId { get; set; }
+    Tickets Tickets { get; set; } = new Tickets();
+    public bool Existe { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (TicketId != 0)
+        {
+            await Buscar();
+        }
+    }
+    public async Task Buscar()
+    {
+        Existe = false;
+        var encontro = await ticketService.Buscar(TicketId);
+
+        if (encontro != null)
+        {
+            Tickets = encontro;
+        }
+        else
+        {
+            Nuevo();
+        }
+    }
+
+    public async Task Guardar()
+    {
+        if (await Validar())
+        {
+            return;
+        }
+
+        var guardo = await ticketService.Guardar(Tickets);
+        if (guardo)
+        {
+            Nuevo();
+        }
+    }
+
+    public void Nuevo()
+    {
+        Tickets = new Tickets();
+        Existe = false;
+    }
+
+    public async Task<bool> Validar()
+    {
+        var lista = await ticketService.Listar(t => t.TicketId! == Tickets.TicketId! && t.TicketId != Tickets.TicketId);
+        Existe = lista.Any();
+        return Existe;
+    }
+}

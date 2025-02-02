@@ -1,10 +1,10 @@
-﻿@page "/Tecnico/Index"
-@inject TecnicoService tecnicoService
+﻿@page "/Ticket/Index"
+@inject TicketService ticketService
 @rendermode InteractiveServer
 
-<EditForm Model="ListaTecnicos" class="border shadow-lg p-3 rounded">
+<EditForm Model="ListaTickets" class="border shadow-lg p-3 rounded">
     <div class="card-header bg-primary text-white text-center py-2 rounded">
-        <h3 style="font-weight: bold;" class="mb-0 font-weight-bold">Consulta T&eacute;cnicos</h3>
+        <h3 style="font-weight: bold;" class="mb-0 font-weight-bold">Consulta Tickets</h3>
     </div>
     <div class="card-body">
         <div class="row mb-3 align-items-end">
@@ -13,9 +13,9 @@
             <div class="col-md-3">
                 <label for="Filtro" class="form-label">Filtrar por:</label>
                 <select @bind="filtro" class="form-select">
-                    <option value="id">ID</option>
-                    <option value="nombre">Nombre</option>
-                    <option value="sueldo">Sueldo</option>
+                    <option value="ticketId">TicketId</option>
+                    <option value="prioridad">Prioridad</option>
+                    <option value="clienteId">ClienteId</option>
                 </select>
             </div>
 
@@ -32,7 +32,7 @@
 
             @*Boton Crear*@
             <div class="col-md-3 text-end">
-                <a href="/Tecnico/Create" class="btn btn-success" type="button"><span class="bi bi-floppy"></span> Crear </a>
+                <a href="/Ticket/Create" class="btn btn-success" type="button"><span class="bi bi-floppy"></span> Crear </a>
             </div>
         </div>
     </div>
@@ -41,39 +41,42 @@
     <table class="table table-bordered text-center">
         <thead class="bg-primary text-white">
             <tr>
-                <th>Id</th>
-                <th>Nombre</th>
-                <th>Sueldo por Hora</th>
+                <th>TicketId</th>
+                <th>Fecha</th>
+                <th>Prioridad</th>
+                <th>ClienteId</th>
+                <th>Asunto</th>
+                <th>Descripcion</th>
+                <th>TiempoInvertido</th>
+                <th>TecnicoId</th>
                 <th>Editar</th>
                 <th>Eliminar</th>
             </tr>
         </thead>
 
         <tbody>
-            @foreach (var tecnico in ListaTecnicos)
+            @foreach (var ticket in ListaTickets)
             {
                 <tr>
-                    <td>@tecnico.TecnicoId</td>
-                    <td>@tecnico.Nombre</td>
-                    <td>@tecnico.SueldoHora</td>
-                    <td>
+                    <td>@ticket.TicketId</td>
+                    <td>@ticket.Fecha</td>
+                    <td>@ticket.Prioridad</td>
+                    <td>@ticket.ClienteId</td>
+                    <td>@ticket.Asunto</td>
+                    <td>@ticket.Descripcion</td>
+                    <td>@ticket.TiempoInvertido</td>
+                    <td>@ticket.TecnicoId</td>
 
-                        @*Boton Details*@
-                        <a href="/Tecnico/Details/@tecnico.TecnicoId" style="border: none; background-color: transparent;" class="btn-detalle">
-                            <span class="bi bi-info-circle-fill" style="font-size: 2rem;"></span>
-                        </a>
-
-                    </td>
                     <td>
                         @*Boton Editar*@
-                        <a href="/Tecnico/Edit/@tecnico.TecnicoId" style="border: none; background-color: transparent;" class="btn-editar">
+                        <a href="/Ticket/Edit/@ticket.TicketId" style="border: none; background-color: transparent;" class="btn-editar">
                             <span class="bi bi-marker-tip" style="font-size: 2rem;"></span>
                         </a>
                     </td>
 
                     <td>
                         @*Boton Eliminar*@
-                        <a href="/Tecnico/Delete/@tecnico.TecnicoId" style="border: none; background-color: transparent;" class="btn-eliminar">
+                        <a href="/Ticket/Delete/@ticket.TicketId" style="border: none; background-color: transparent;" class="btn-eliminar">
                             <span class="bi bi-dash-circle-fill" style="font-size: 2rem;"></span>
                         </a>
                     </td>
@@ -83,40 +86,40 @@
     </table>
 </EditForm>
 @code {
-    public List<Tecnicos> ListaTecnicos = new List<Tecnicos>();
+    public List<Tickets> ListaTickets = new List<Tickets>();
     private string valorFiltro = "";
     private string filtro = "Id";
 
     protected override async Task OnInitializedAsync()
     {
-        ListaTecnicos = await tecnicoService.Listar(c => true);
+        ListaTickets = await ticketService.Listar(c => true);
     }
     public async Task Buscar()
     {
 
         if (!string.IsNullOrWhiteSpace(valorFiltro))
         {
-            if (filtro == "id" && int.TryParse(valorFiltro, out int TecnicoId))
+            if (filtro == "ticketId" && int.TryParse(valorFiltro, out int TicketId))
             {
-                ListaTecnicos = await tecnicoService.Listar(t => t.TecnicoId == TecnicoId);
+                ListaTickets = await ticketService.Listar(t => t.TicketId == TicketId);
             }
-            else if (filtro == "nombre")
+            else if (filtro == "prioridad")
             {
                 string filtroMinuscula = valorFiltro.ToLower();
-                ListaTecnicos = await tecnicoService.Listar(t => t.Nombre.ToLower().Contains(filtroMinuscula));
+                ListaTickets = await ticketService.Listar(t => t.Prioridad.ToLower().Contains(filtroMinuscula));
             }
-            else if (filtro == "sueldo" && double.TryParse(valorFiltro, out double SueldoHora))
+            else if (filtro == "clienteId" && int.TryParse(valorFiltro, out int ClienteId))
             {
-                ListaTecnicos = await tecnicoService.Listar(t => t.SueldoHora == SueldoHora);
+                ListaTickets = await ticketService.Listar(t => t.ClienteId == ClienteId);
             }
             else
             {
-                ListaTecnicos = new List<Tecnicos>();
+                ListaTickets = new List<Tickets>();
             }
         }
         else
         {
-            ListaTecnicos = await tecnicoService.Listar(t => true);
+            ListaTickets = await ticketService.Listar(t => true);
         }
     }
 }

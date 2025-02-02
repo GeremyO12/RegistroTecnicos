@@ -1,0 +1,91 @@
+﻿@page "/Ticket/Delete"
+@page "/Ticket/Delete/{TicketId:int}"
+@inject TicketService ticketService
+@inject NavigationManager navigationManager
+@inject NotificationService NotificationService
+@rendermode InteractiveServer
+
+<PageTitle>Eliminar Ticket</PageTitle>
+@if (Tickets != null)
+{
+    <div class="container">
+        <div class="card shadow-header">
+
+            <div class="card-header  bg-primary text-white text-center py-2 rounded">
+                <h3><strong>Eliminar Ticket</strong></h3>
+            </div>
+            <div class="card-header">
+                <h3 class="text-danger">¿Estás seguro de que quieres eliminar el siguiente ticket?</h3>
+            </div>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card shadow-lg">
+                            <div class="card-header">
+                                <h3 class="text-center"><strong>Datos del Ticket</strong></h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="border-primary border-2 borde">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <ul class="list-unstyled">
+                                                    <li><strong>TicketId:</strong> @Tickets.ClienteId</li>
+                                                    <li><strong>Fecha:</strong> @Tickets.Fecha</li>
+                                                    <li><strong>Prioridad:</strong> @Tickets.Prioridad</li>
+                                                    <li><strong>ClienteId:</strong> @Tickets.ClienteId</li>
+                                                    <li><strong>Asunto:</strong> @Tickets.Asunto</li>
+                                                    <li><strong>Descripcion:</strong> @Tickets.Descripcion</li>
+                                                    <li><strong>TiempoInvertido:</strong> @Tickets.TiempoInvertido</li>
+                                                    <li><strong>TecnicoId:</strong> @Tickets.TecnicoId</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                @*Boton Eliminar*@
+                <button type="button" class="btn btn-outline-danger" @onclick="EliminarCliente"><i class="bi bi-trash-fill"></i> Eliminar</button>
+                @*Boton Volver*@
+                <button type="button" class="btn btn-outline-primary" @onclick="Volver"><i class="bi bi-box-arrow-left"></i> Volver</button>
+            </div>
+
+        </div>
+    </div>
+}
+else
+{
+    <p>Ticket no encontrado.</p>
+}
+
+@code {
+    [Parameter]
+    public int TicketId { get; set; }
+    public Tickets? Tickets { get; set; } = new Tickets();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (TicketId != 0)
+        {
+            Tickets = await ticketService.Buscar(TicketId);
+        }
+    }
+
+    public async Task EliminarCliente()
+    {
+        var eliminado = await ticketService.Eliminar(Tickets.TicketId);
+        Volver();
+    }
+
+    public void Volver()
+    {
+        navigationManager.NavigateTo("/Ticket/Index");
+    }
+}

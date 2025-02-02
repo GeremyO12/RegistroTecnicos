@@ -1,0 +1,145 @@
+﻿@page "/Cliente/Index"
+@inject ClienteService clienteService
+@rendermode InteractiveServer
+
+
+<EditForm Model="ListaCliente" class="border shadow-lg p-3 rounded">
+    <div class="card-header bg-primary text-white text-center py-2 rounded">
+        <h3 style="font-weight: bold;" class="mb-0 font-weight-bold">Consulta Clientes</h3>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3 align-items-end">
+
+            @*Filtro*@
+            <div class="col-md-3">
+                <label for="Filtro" class="form-label">Filtrar por:</label>
+                <select @bind="filtro" class="form-select">
+                    <option value="rnc">RNC</option>
+                    <option value="id">ID</option>
+                    <option value="nombre">Nombre</option>
+                </select>
+            </div>
+
+            @*Barra Busqueda*@
+            <div class="col-md-6">
+                <label for="ValorFiltro" class="form-label">Búsqueda:</label>
+                <div class="input-group">
+                    <input @bind="valorFiltro" class="form-control" placeholder="Buscar" />
+                    <button @onclick="Buscar" class="btn btn-outline-primary" type="button">
+                        <span class="bi bi-search"></span> 
+                    </button>
+                </div>
+            </div>
+
+            @*Boton Crear*@
+            <div class="col-md-3 text-end">
+                <a href="/Cliente/Create" class="btn btn-success" type="button"><span class="bi bi-floppy"></span> Crear </a>
+            </div>
+        </div>
+    </div>
+    @*Tabla*@
+    <table class="table table-bordered text-center">
+        <thead class="bg-primary text-white">
+            <tr>
+                <th>ClienteId</th>
+                <th>Fecha Ingreso</th>
+                <th>Nombres</th>
+                <th>Dirección</th>
+                <th>RNC</th>
+                <th>Limite de Credito</th>
+                <th>TecnicoId</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var cliente in ListaCliente)
+            {
+                <tr>
+                    <td>@cliente.ClienteId</td>
+                    <td>@cliente.FechaIngreso</td>
+                    <td>@cliente.Nombres</td>
+                    <td>@cliente.Direccion</td>
+                    <td>@cliente.Rnc</td>
+                    <td>@cliente.LimiteCredito</td>
+                    <td>@cliente.TecnicoId</td>
+                    
+                    <td>
+
+                        @*Boton Details*@
+                        <a href="/Cliente/Details/@cliente.TecnicoId" style="border: none; background-color: transparent;" class="btn-detalle">
+                            <span class="bi bi-info-circle-fill" style="font-size: 2rem;"></span>
+                        </a>
+
+                    </td>
+                    <td>
+                        @*Boton Editar*@
+                        <a href="/Cliente/Edit/@cliente.TecnicoId" style="border: none; background-color: transparent;" class="btn-editar">
+                            <span class="bi bi-marker-tip" style="font-size: 2rem;"></span>
+                        </a>
+                    </td>
+
+                    <td>
+                        @*Boton Eliminar*@
+                        <a href="/Cliente/Delete/@cliente.TecnicoId" style="border: none; background-color: transparent;" class="btn-eliminar">
+                            <span class="bi bi-dash-circle-fill" style="font-size: 2rem;"></span>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</EditForm>
+
+@code {
+    private List<Clientes> clientes = new();
+    public List<Clientes> ListaCliente = new List<Clientes>();
+    private string valorFiltro = "";
+    private string filtro = "Id";
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaCliente = await clienteService.Listar(c => true);
+    }
+    public async Task Buscar()
+    {
+
+        if (!string.IsNullOrWhiteSpace(valorFiltro))
+        {
+            if (filtro == "cliente" && int.TryParse(valorFiltro, out int ClienteId))
+            {
+                ListaCliente = await clienteService.Listar(t => t.ClienteId == ClienteId);
+            }
+            else if (filtro == "nombre")
+            {
+                string filtroMinuscula = valorFiltro.ToLower();
+                ListaCliente = await clienteService.Listar(t => t.Nombres.ToLower().Contains(filtroMinuscula));
+            }
+            else if (filtro == "direccion" && double.TryParse(valorFiltro, out double Direccion))
+            {
+                string filtroMinuscula = valorFiltro.ToLower();
+                ListaCliente = await clienteService.Listar(t => t.Direccion.ToLower().Contains(filtroMinuscula));
+            }
+            else if (filtro == "rnc" && int.TryParse(valorFiltro, out int Rnc))
+            {
+                string filtroMinuscula = valorFiltro.ToLower();
+                ListaCliente = await clienteService.Listar(t => t.Rnc.ToLower().Contains(filtroMinuscula));
+            }
+            else if (filtro == "credito" && int.TryParse(valorFiltro, out int LimiteCredito))
+            {
+                ListaCliente = await clienteService.Listar(t => t.LimiteCredito == LimiteCredito);
+            }
+            else if (filtro == "tecnico" && int.TryParse(valorFiltro, out int TecnicoId))
+            {
+                ListaCliente = await clienteService.Listar(t => t.TecnicoId == TecnicoId);
+            }
+            else
+            {
+                ListaCliente = new List<Clientes>();
+            }
+        }
+        else
+        {
+            ListaCliente = await clienteService.Listar(t => true);
+        }
+    }
+}

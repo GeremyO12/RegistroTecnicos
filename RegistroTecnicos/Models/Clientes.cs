@@ -11,6 +11,7 @@ public class Clientes
     public string Nombres { get; set; } = string.Empty;
     public string Direccion { get; set; } = string.Empty;
     public string Rnc { get; set; } = string.Empty;
+    [Precision(18, 2)]
     public decimal LimiteCredito { get; set; }
     public int TecnicoId { get; set; }
 }

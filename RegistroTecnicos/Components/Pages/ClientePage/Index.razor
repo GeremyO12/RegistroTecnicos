@@ -15,7 +15,7 @@
                 <label for="Filtro" class="form-label">Filtrar por:</label>
                 <select @bind="filtro" class="form-select">
                     <option value="rnc">RNC</option>
-                    <option value="id">ID</option>
+                    <option value="clienteId">ID</option>
                     <option value="nombre">Nombre</option>
                 </select>
             </div>
@@ -48,6 +48,8 @@
                 <th>RNC</th>
                 <th>Limite de Credito</th>
                 <th>TecnicoId</th>
+                <th>Editar</th>
+                <th>Eliminar</th>
             </tr>
         </thead>
 
@@ -94,7 +96,7 @@
     private List<Clientes> clientes = new();
     public List<Clientes> ListaCliente = new List<Clientes>();
     private string valorFiltro = "";
-    private string filtro = "Id";
+    private string filtro = "clienteId";
 
     protected override async Task OnInitializedAsync()
     {
@@ -105,7 +107,7 @@
 
         if (!string.IsNullOrWhiteSpace(valorFiltro))
         {
-            if (filtro == "cliente" && int.TryParse(valorFiltro, out int ClienteId))
+            if (filtro == "clienteId" && int.TryParse(valorFiltro, out int ClienteId))
             {
                 ListaCliente = await clienteService.Listar(t => t.ClienteId == ClienteId);
             }
@@ -114,24 +116,13 @@
                 string filtroMinuscula = valorFiltro.ToLower();
                 ListaCliente = await clienteService.Listar(t => t.Nombres.ToLower().Contains(filtroMinuscula));
             }
-            else if (filtro == "direccion" && double.TryParse(valorFiltro, out double Direccion))
-            {
-                string filtroMinuscula = valorFiltro.ToLower();
-                ListaCliente = await clienteService.Listar(t => t.Direccion.ToLower().Contains(filtroMinuscula));
-            }
+            
             else if (filtro == "rnc" && int.TryParse(valorFiltro, out int Rnc))
             {
                 string filtroMinuscula = valorFiltro.ToLower();
                 ListaCliente = await clienteService.Listar(t => t.Rnc.ToLower().Contains(filtroMinuscula));
             }
-            else if (filtro == "credito" && int.TryParse(valorFiltro, out int LimiteCredito))
-            {
-                ListaCliente = await clienteService.Listar(t => t.LimiteCredito == LimiteCredito);
-            }
-            else if (filtro == "tecnico" && int.TryParse(valorFiltro, out int TecnicoId))
-            {
-                ListaCliente = await clienteService.Listar(t => t.TecnicoId == TecnicoId);
-            }
+
             else
             {
                 ListaCliente = new List<Clientes>();
